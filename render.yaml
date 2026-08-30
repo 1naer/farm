@@ -1,16 +1,16 @@
 services:
-- type: worker
-  name: lobster-farm-bot
-  env: python
-  plan: starter
-  buildCommand: pip install -r requirements.txt
-  startCommand: python3 lobster_farm_bot_v6_4_render_day1.py
-  envVars:
-  - key: FARM_COOKIE
-    sync: false
-  - key: FARM_ARBITRAGE_ENABLED
-    value: "true"
-  - key: FARM_ARBITRAGE_START_NEXT_DAY
-    value: "false"
-  - key: FARM_TIMEZONE
-    value: Asia/Shanghai
+  - type: web
+    name: lobster-farm-bot
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 lobster_farm_bot_v6_4_render_day1.py
+    envVars:
+      - key: FARM_COOKIE
+        sync: false
+      - key: FARM_ARBITRAGE_ENABLED
+        value: "true"
+      - key: FARM_ARBITRAGE_START_NEXT_DAY
+        value: "false"
+      - key: FARM_TIMEZONE
+        value: Asia/Shanghai
