@@ -29,6 +29,9 @@ import re
 import urllib.request
 import urllib.error
 import urllib.parse
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
+
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 try:
@@ -1165,9 +1168,32 @@ def calc_next_sleep(data):
         return MIN_SLEEP_SECONDS
     return max(MIN_SLEEP_SECONDS, min(min(remains) + READY_GRACE_SECONDS, MAX_SLEEP_SECONDS))
 
+def start_health_server():
+    class HealthHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = b"lobster farm bot alive\n"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, format, *args):
+            return
+
+    port = int(os.environ.get("PORT", "10000"))
+    server = HTTPServer(("0.0.0.0", port), HealthHandler)
+    log(f"HTTP保活端口已启动: 0.0.0.0:{port}")
+    server.serve_forever()
+
+
+def start_background_services():
+    threading.Thread(target=start_health_server, daemon=True).start()
+
 
 def main():
-    log("龙虾农场智能挂机脚本 v6.4 启动：动态升级保留金/ROI自动浇水/启动即启用低买高位回落套利/Render适配")
+    log("龙虾农场智能挂机脚本 v6.4 启动：动态升级保留金/ROI自动浇水/启动即启用低买高位回落套利/Render Web保活适配")
+    start_background_services()
     init_estimated_balance()
     log(
         f"配置：地块=1~12 自动升级={AUTO_UPGRADE} 每轮最多升级={MAX_UPGRADE_PER_ROUND} "
